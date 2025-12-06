@@ -1,15 +1,14 @@
 {
-  "name": "ppqcheck",
-  "version": "1.0.0",
+  "name": "ipa-gitea-render-2",
+  "version": "2.0.0",
   "main": "server.js",
-  "type": "module",
-  "scripts": {
-    "start": "node server.js"
-  },
+  "scripts": { "start": "node server.js" },
   "dependencies": {
     "express": "^4.18.2",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^1.4.5",
+    "axios": "^1.6.0",
     "adm-zip": "^0.5.10",
+    "plist": "^3.0.0",
     "cors": "^2.8.5"
   }
 }

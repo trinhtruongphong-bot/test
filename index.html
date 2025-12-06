@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>IPA Store</title>
+
+<style>
+body { font-family: -apple-system; background:#f2f2f7; padding:20px; }
+.container { max-width:600px; margin:auto; }
+
+#dropzone {
+    background:white;
+    padding:40px;
+    border-radius:16px;
+    border:2px dashed #007aff;
+    text-align:center;
+    color:#007aff;
+    margin-bottom:20px;
+    font-size:18px;
+}
+
+.card {
+    background:white;
+    padding:14px;
+    border-radius:16px;
+    display:flex;
+    margin-bottom:14px;
+    box-shadow:0 2px 5px #0001;
+}
+
+.icon {
+    width:60px;
+    height:60px;
+    border-radius:12px;
+    margin-right:15px;
+    object-fit:cover;
+    background:#ddd;
+}
+
+.name { font-size:18px; font-weight:600; }
+
+.btn {
+    background:#007aff;
+    color:white;
+    padding:10px 14px;
+    border-radius:10px;
+    text-decoration:none;
+    display:inline-block;
+    margin-top:8px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h2>IPA Library</h2>
+
+<div id="dropzone">Kéo thả IPA vào đây để upload</div>
+
+<div id="list"></div>
+</div>
+
+<script>
+const dz = document.getElementById("dropzone");
+
+dz.addEventListener("dragover", e => {
+    e.preventDefault();
+    dz.style.background = "#e5f0ff";
+});
+
+dz.addEventListener("dragleave", e => {
+    dz.style.background = "white";
+});
+
+dz.addEventListener("drop", async e => {
+    e.preventDefault();
+    dz.style.background = "white";
+
+    const file = e.dataTransfer.files[0];
+    if (!file.name.endsWith(".ipa")) return alert("Chỉ nhận file .ipa");
+
+    const form = new FormData();
+    form.append("ipa", file);
+
+    dz.innerHTML = "Đang upload…";
+
+    let upload = await fetch("/upload", {
+        method: "POST",
+        body: form
+    });
+
+    let data = await upload.json();
+    dz.innerHTML = "Upload xong ✔";
+
+    loadIPA();
+});
+
+async function loadIPA() {
+    let r = await fetch("/list");
+    let data = await r.json();
+
+    const div = document.getElementById("list");
+    div.innerHTML = "";
+
+    data.forEach(app => {
+        div.innerHTML += `
+        <div class="card">
+            <img src="${app.icon}" class="icon">
+            <div>
+                <div class="name">${app.name}</div>
+                <a class="btn" href="${app.install}">Install</a>
+            </div>
+        </div>`;
+    });
+}
+
+loadIPA();
+</script>
+
+</body>
+</html>
