@@ -111,27 +111,34 @@ app.post("/upload", upload.single("ipa"), async (req, res) => {
 
 app.get("/list", async (req, res) => {
     try {
-        const r = await axios.get(
-            `${GITEA_URL}/api/v1/repos/${GITEA_OWNER}/${GITEA_REPO}/contents/iPA`,
-            { headers: { Authorization: `token ${GITEA_TOKEN}` } }
-        );
+        const url = `${GITEA_URL}/api/v1/repos/${GITEA_OWNER}/${GITEA_REPO}/contents/iPA`;
+        console.log("Fetching:", url);
+
+        const r = await axios.get(url, {
+            headers: { Authorization: `token ${GITEA_TOKEN}` }
+        });
 
         const files = r.data
             .filter(f => f.name.endsWith(".ipa"))
             .map(f => {
-                const iconName = f.name.replace(".ipa", ".png");
+                const plistRaw =
+                    `${GITEA_URL}/api/v1/repos/${GITEA_OWNER}/${GITEA_REPO}/raw/Plist/${f.name.replace(".ipa",".plist")}`;
+
                 return {
                     name: f.name,
                     url: f.download_url,
-                    icon: `/icons/${iconName}`,
-                    install:
-                    `itms-services://?action=download-manifest&url=${
-                        encodeURIComponent(
-                            `${GITEA_URL}/api/v1/repos/${GITEA_OWNER}/${GITEA_REPO}/raw/Plist/${f.name.replace(".ipa",".plist")}`
-                        )
-                    }`
-                }
+                    icon: `/icons/${f.name.replace(".ipa", ".png")}`,
+                    install: `itms-services://?action=download-manifest&url=${encodeURIComponent(plistRaw)}`
+                };
             });
+
+        res.json(files);
+
+    } catch (err) {
+        console.log("LIST ERROR:", err.response?.data || err.message);
+        res.json([]);
+    }
+});
 
         res.json(files);
 
